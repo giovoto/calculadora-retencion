@@ -2,17 +2,13 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Calculadora de Retención - Colombia 2025</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
-      font-family: "Inter", sans-serif;
+      font-family: 'Inter', sans-serif;
       background: linear-gradient(135deg, #f0f2f5, #dbe2ef);
       padding: 40px;
       display: flex;
@@ -48,15 +44,20 @@
       display: block;
       color: #444;
     }
-    select,
-    input[type="number"],
-    input[type="checkbox"] {
+    select, input[type="number"], input[type="text"] {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
       border: 1px solid #ccc;
       border-radius: 8px;
       font-size: 14px;
+      background: #f4f7fa;
+      transition: border 0.2s;
+    }
+    select:focus, input:focus {
+      border: 1.5px solid #007bff;
+      outline: none;
+      background: #eaf2fc;
     }
     .checkbox-label {
       display: flex;
@@ -77,10 +78,21 @@
       border-radius: 8px;
       margin-top: 25px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      letter-spacing: 0.02em;
     }
     button:hover {
       background-color: #0056b3;
+      box-shadow: 0 4px 14px rgba(0,123,255,0.12);
+    }
+    #btn-limpiar {
+      background-color: #6c757d !important;
+      margin-top: 10px !important;
+    }
+    #btn-limpiar:hover {
+      background-color: #495057 !important;
     }
     #resultado {
       background-color: #f8f9fa;
@@ -91,45 +103,34 @@
       max-width: 350px;
       margin-top: 0;
       height: fit-content;
+      display: none;
+      box-shadow: 0 5px 18px rgba(0,123,255,0.06);
     }
     #resultado p {
       margin: 8px 0;
       font-size: 15px;
-      color: #333;
       word-wrap: break-word;
     }
-    #ciiu-group {
-      display: none;
+    .valor-grande {
+      font-size: 22px;
+      font-weight: bold;
+      color: #000;
+      margin-top: 20px;
     }
-    .resultado-columna {
-      flex: 1;
-      margin-left: 20px;
-      background-color: #f8f9fa;
-      padding: 20px;
-      border-radius: 10px;
-      border-left: 6px solid #007bff;
-      min-width: 320px;
-      max-width: 350px;
-      margin-top: 0;
-      height: fit-content;
+    .valor-suave {
+      color: #888;
     }
     .total-destacado {
       font-size: 20px;
       font-weight: bold;
-      color: #007bff;
+      color: #000;
       margin-top: 18px;
     }
-    @media (max-width: 900px) {
-      .flex-container {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .resultado-columna {
-        margin-top: 25px;
-        max-width: 100%;
-        min-width: 0;
-        margin-left: 0;
-      }
+    #ica-container {
+      display: none;
+    }
+    #declarante-container {
+      display: none;
     }
   </style>
 </head>
@@ -138,34 +139,38 @@
     <div class="container">
       <h2>Calculadora de Retención 2025</h2>
       <form id="calc-form">
-        <label for="regimen">Tipo de régimen:</label>
-        <select id="regimen" required>
-          <option value="no_declarante">No declarante</option>
-          <option value="responsable_iva">Responsable de IVA</option>
-          <option value="gran_contribuyente">Gran contribuyente</option>
-          <option value="gran_autoretenedor">Gran contribuyente autoretenedor</option>
+        <label for="quienCompra">¿Quién compra?</label>
+        <select id="quienCompra" required>
+          <option value="persona_juridica">Persona Jurídica</option>
+          <option value="persona_natural">Persona Natural</option>
         </select>
 
-        <label for="operacion">Tipo de operación:</label>
-        <select id="operacion" required>
-          <option value="honorarios">Honorarios</option>
-          <option value="servicios">Servicios</option>
-          <option value="arrendamientos">Arrendamientos</option>
-          <option value="compras">Compras</option>
+        <label for="quienVende">¿Quién vende?</label>
+        <select id="quienVende" required>
+          <option value="persona_juridica">Persona Jurídica</option>
+          <option value="persona_natural">Persona Natural</option>
         </select>
 
-        <label for="persona">Tipo de persona:</label>
-        <select id="persona" required>
-          <option value="natural">Persona Natural</option>
-          <option value="juridica">Persona Jurídica</option>
-        </select>
+        <div class="checkbox-label" id="declarante-container">
+          <input type="checkbox" id="esNoDeclarante" />
+          <label for="esNoDeclarante">¿La persona natural no es declarante del impuesto de renta?</label>
+        </div>
+
+        <label for="razonSocial">Razón Social (opcional):</label>
+        <input type="text" id="razonSocial" placeholder="Ej: Constructora XYZ S.A.S" />
+
+        <label for="responsabilidades">Responsabilidades fiscales:</label>
+        <select id="responsabilidades" multiple size="6" required></select>
 
         <label for="valor">Valor de la operación (sin IVA):</label>
         <input type="number" id="valor" min="0" step="0.01" required />
 
-        <div class="checkbox-label">
-          <input type="checkbox" id="aplicaIVA" />
-          <label for="aplicaIVA">¿Aplica IVA?</label>
+        <label>Tarifa de IVA:</label>
+        <div id="iva-options" style="margin-top: 5px;">
+          <label class="checkbox-label"><input type="checkbox" name="iva" value="0.05" /> IVA 5%</label>
+          <label class="checkbox-label"><input type="checkbox" name="iva" value="0.19" /> IVA 19%</label>
+          <label class="checkbox-label"><input type="checkbox" name="iva" value="0" data-etiqueta="exento" /> Exento</label>
+          <label class="checkbox-label"><input type="checkbox" name="iva" value="0" data-etiqueta="excluido" /> Excluido</label>
         </div>
 
         <div class="checkbox-label">
@@ -173,210 +178,218 @@
           <label for="esBogota">¿La operación se realiza en Bogotá?</label>
         </div>
 
-        <div id="ciiu-group">
-          <label for="ciiu">Actividad económica (CIIU):</label>
-          <select id="ciiu">
-            <option value="1011">1011 - Producción de carne</option>
-            <option value="1020">1020 - Producción láctea</option>
-            <option value="1511">1511 - Confección prendas de vestir</option>
-            <option value="2410">2410 - Fabricación hierro, acero y material transporte</option>
-            <option value="5811">5811 - Actividades editoriales (libros)</option>
-            <option value="4711">
-              4711 - Comercio al por menor (alimentos y medicinas)
-            </option>
-            <option value="4721">4721 - Venta productos agrícolas en bruto</option>
-            <option value="4641">4641 - Venta de maderas y materiales construcción</option>
-            <option value="4511">4511 - Comercio de vehículos</option>
-            <option value="4631">4631 - Venta cigarrillos y licores</option>
-            <option value="4722">4722 - Venta de combustibles</option>
-            <option value="4643">4643 - Venta de joyas</option>
-            <option value="4690">4690 - Otros comercios</option>
-            <option value="4930">4930 - Transporte terrestre</option>
-            <option value="6010">6010 - Transporte aéreo</option>
-            <option value="6020">6020 - Transporte marítimo</option>
-            <option value="6201">6201 - Desarrollo de software a medida</option>
-            <option value="6202">6202 - Consultoría informática</option>
-            <option value="7110">7110 - Servicios técnicos y profesionales</option>
-            <option value="5611">5611 - Restaurantes y comidas</option>
-            <option value="5510">5510 - Hoteles y alojamientos</option>
-            <option value="8010">8010 - Servicios de vigilancia</option>
-            <option value="8541">8541 - Educación privada</option>
-            <option value="6820">6820 - Actividades inmobiliarias</option>
-            <option value="9602">9602 - Peluquería y otros servicios personales</option>
-            <option value="6419">6419 - Servicios financieros</option>
+        <div id="ica-container">
+          <label for="tarifaICA">Tarifa ICA Bogotá (‰):</label>
+          <select id="tarifaICA">
+            <option value="">Seleccione una tarifa</option>
+            <option value="4.14">4.14 ‰</option>
+            <option value="6.9">6.9 ‰</option>
+            <option value="8">8.0 ‰</option>
+            <option value="11.04">11.04 ‰</option>
           </select>
         </div>
 
         <button type="submit">Calcular</button>
-        <button
-          type="button"
-          id="btn-limpiar"
-          style="margin-top: 10px; background-color: #6c757d"
-        >
-          Limpiar
-        </button>
+        <button type="button" id="btn-limpiar">Limpiar</button>
       </form>
     </div>
-    <div id="resultado" class="resultado-columna" style="display: none"></div>
+    <div id="resultado"></div>
   </div>
 
   <script>
-    const tarifasICABogota = {
-      // A. Actividades Industriales (Tarifa por mil)
-      alimentos: 0.00414,
-      hierro_acero_transporte: 0.0069,
-      libros: 0.008,
-      industrial_otros: 0.01104,
+    const responsabilidadesSelect = document.getElementById('responsabilidades');
+    const quienVendeSelect = document.getElementById('quienVende');
+    const quienCompraSelect = document.getElementById('quienCompra');
+    const razonSocialInput = document.getElementById('razonSocial');
+    const valorInput = document.getElementById('valor');
+    const esBogotaInput = document.getElementById('esBogota');
+    const icaContainer = document.getElementById('ica-container');
+    const tarifaICASelect = document.getElementById('tarifaICA');
+    const resultadoDiv = document.getElementById('resultado');
+    const declaranteContainer = document.getElementById('declarante-container');
 
-      // B. Actividades Comerciales (Tarifa por mil)
-      alimentos_agricolas_libros_medicamentos: 0.00414,
-      maderas_automotores_contables: 0.0069,
-      cigarrillos_licores_combustibles_joyas: 0.0138,
-      comercial_otros: 0.01104,
-
-      // C. Actividades de servicios (Tarifa por mil)
-      transporte_publicacion_radio_tv: 0.00414,
-      consultoria_construccion_cine: 0.0069,
-      restaurante_hotel_vigilancia: 0.0138,
-      educacion_privada: 0.007,
-      servicios_otros: 0.00966,
-
-      // D. Actividades financieras (Tarifa por mil)
-      financieras: 0.01104,
+    const responsabilidades = {
+      persona_juridica: [
+        { value: 'O-13', label: 'O-13 - Gran Contribuyente' },
+        { value: 'O-15', label: 'O-15 - Autorretenedor' },
+        { value: 'O-23', label: 'O-23 - Agente de Retención IVA' },
+        { value: 'O-47', label: 'O-47 - Régimen Simple' },
+        { value: 'R-99-PN', label: 'R-99-PN - No responsable' },
+        { value: 'NINGUNA', label: 'No aplica / Sin responsabilidad' },
+      ],
+      persona_natural: [
+        { value: 'O-47', label: 'O-47 - Régimen Simple' },
+        { value: 'R-99-PN', label: 'R-99-PN - No responsable' },
+        { value: 'NINGUNA', label: 'No aplica / Sin responsabilidad' },
+      ],
     };
 
-    const ciiuCategoria = {
-      // Industriales
-      "1011": "alimentos",
-      "1020": "alimentos",
-      "1511": "industrial_otros",
-      "2410": "hierro_acero_transporte",
-      "5811": "libros",
+    function cargarResponsabilidades(tipoPersona) {
+      responsabilidadesSelect.innerHTML = '';
+      (responsabilidades[tipoPersona] || []).forEach((opcion) => {
+        const option = document.createElement('option');
+        option.value = opcion.value;
+        option.textContent = opcion.label;
+        responsabilidadesSelect.appendChild(option);
+      });
 
-      // Comerciales
-      "4711": "alimentos_agricolas_libros_medicamentos",
-      "4721": "alimentos_agricolas_libros_medicamentos",
-      "4641": "maderas_automotores_contables",
-      "4511": "maderas_automotores_contables",
-      "4631": "cigarrillos_licores_combustibles_joyas",
-      "4722": "cigarrillos_licores_combustibles_joyas",
-      "4643": "cigarrillos_licores_combustibles_joyas",
-      "4690": "comercial_otros",
+      const savedResp = localStorage.getItem('form-responsabilidades');
+      if (savedResp) {
+        const values = JSON.parse(savedResp);
+        Array.from(responsabilidadesSelect.options).forEach(opt => {
+          opt.selected = values.includes(opt.value);
+        });
+      }
+    }
 
-      // Servicios
-      "4930": "transporte_publicacion_radio_tv",
-      "6010": "transporte_publicacion_radio_tv",
-      "6020": "transporte_publicacion_radio_tv",
-      "6201": "consultoria_construccion_cine",
-      "6202": "consultoria_construccion_cine",
-      "7110": "consultoria_construccion_cine",
-      "5611": "restaurante_hotel_vigilancia",
-      "5510": "restaurante_hotel_vigilancia",
-      "8010": "restaurante_hotel_vigilancia",
-      "8541": "educacion_privada",
-      "6820": "servicios_otros",
-      "9602": "servicios_otros",
-
-      // Financieras
-      "6419": "financieras",
-    };
-
-    document.getElementById("esBogota").addEventListener("change", function () {
-      const group = document.getElementById("ciiu-group");
-      group.style.display = this.checked ? "block" : "none";
+    quienVendeSelect.addEventListener('change', () => {
+      cargarResponsabilidades(quienVendeSelect.value);
+      declaranteContainer.style.display = quienVendeSelect.value === 'persona_natural' ? 'flex' : 'none';
     });
 
-    document.getElementById("calc-form").addEventListener("submit", function (e) {
-      e.preventDefault();
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarResponsabilidades(quienVendeSelect.value);
+      icaContainer.style.display = esBogotaInput.checked ? 'block' : 'none';
+      declaranteContainer.style.display = quienVendeSelect.value === 'persona_natural' ? 'flex' : 'none';
 
-      const regimen = document.getElementById("regimen").value;
-      const operacion = document.getElementById("operacion").value;
-      const persona = document.getElementById("persona").value;
-      const valor = parseFloat(document.getElementById("valor").value);
-      const aplicaIVA = document.getElementById("aplicaIVA").checked;
-      const esBogota = document.getElementById("esBogota").checked;
-      const ciiu = document.getElementById("ciiu").value;
+      ['quienCompra', 'quienVende', 'valor', 'razonSocial', 'esBogota', 'tarifaICA'].forEach(id => {
+        const el = document.getElementById(id);
+        const saved = localStorage.getItem(`form-${id}`);
+        if (el && saved !== null) {
+          el.type === 'checkbox' ? el.checked = saved === 'true' : el.value = saved;
+        }
+      });
 
-      if (isNaN(valor) || valor < 0) {
-        alert("Por favor ingresa un valor válido para la operación.");
-        return;
+      const savedResp = localStorage.getItem('form-responsabilidades');
+      if (savedResp) {
+        const values = JSON.parse(savedResp);
+        Array.from(responsabilidadesSelect.options).forEach(opt => {
+          opt.selected = values.includes(opt.value);
+        });
       }
-
-      const esDeclarante = regimen === "responsable_iva" || regimen.includes("gran");
-
-      let porcentajeRetencion = 0;
-      let baseMinima = 0;
-      const porcentajeIVA = 0.19;
-
-      if (operacion === "honorarios") {
-        porcentajeRetencion = persona === "juridica" ? 0.11 : esDeclarante ? 0.11 : 0.10;
-        baseMinima = 0;
-      } else if (operacion === "servicios") {
-        porcentajeRetencion = esDeclarante ? 0.04 : 0.06;
-        baseMinima = 100000;
-      } else if (operacion === "arrendamientos") {
-        porcentajeRetencion = 0.035;
-        baseMinima = 498000;
-      } else if (operacion === "compras") {
-        porcentajeRetencion = esDeclarante ? 0.025 : 0.035;
-        baseMinima = 498000;
-      }
-
-      const iva = aplicaIVA ? valor * porcentajeIVA : 0;
-      const retencion = valor >= baseMinima ? valor * porcentajeRetencion : 0;
-
-      // Calcula tarifa ICA: si es Bogotá, busca tarifa, si no la encuentra usa "comercial_otros" por defecto
-      const porcentajeICA = esBogota
-        ? tarifasICABogota[ciiuCategoria[ciiu]] ?? tarifasICABogota["comercial_otros"]
-        : 0;
-
-      const ica = valor * porcentajeICA;
-      const totalRetenido = retencion + ica;
-      const totalPagar = valor + iva - totalRetenido;
-
-      const resultado = document.getElementById("resultado");
-      resultado.style.display = "block";
-      resultado.innerHTML = `
-        <p><strong>Valor base:</strong> ${valor.toLocaleString("es-CO", {
-          style: "currency",
-          currency: "COP",
-        })}</p>
-        <p><strong>IVA (${(porcentajeIVA * 100).toFixed(0)}%):</strong> ${iva.toLocaleString(
-          "es-CO",
-          { style: "currency", currency: "COP" }
-        )}</p>
-        <p><strong>Base mínima para retención:</strong> ${baseMinima.toLocaleString(
-          "es-CO",
-          { style: "currency", currency: "COP" }
-        )}</p>
-        <p><strong>Retención en la fuente (${(porcentajeRetencion * 100).toFixed(
-          1
-        )}%):</strong> ${retencion.toLocaleString("es-CO", {
-        style: "currency",
-        currency: "COP",
-      })}</p>
-        <p><strong>Tarifa ICA Bogotá:</strong> ${(porcentajeICA * 1000).toFixed(
-          2
-        )} por mil</p>
-        <p><strong>Valor ICA:</strong> ${ica.toLocaleString("es-CO", {
-          style: "currency",
-          currency: "COP",
-        })} ${esBogota ? "" : "(No aplica fuera de Bogotá)"}</p>
-        <p class="total-destacado">Total retenido: ${totalRetenido.toLocaleString(
-          "es-CO",
-          { style: "currency", currency: "COP" }
-        )}</p>
-        <p class="total-destacado">Total a pagar: ${totalPagar.toLocaleString("es-CO", {
-          style: "currency",
-          currency: "COP",
-        })}</p>
-      `;
     });
 
-    document.getElementById("btn-limpiar").addEventListener("click", function () {
-      document.getElementById("calc-form").reset();
-      document.getElementById("resultado").style.display = "none";
-      document.getElementById("ciiu-group").style.display = "none";
+    esBogotaInput.addEventListener('change', () => {
+      icaContainer.style.display = esBogotaInput.checked ? 'block' : 'none';
+    });
+
+    document.querySelectorAll('#iva-options input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', function () {
+        if (this.checked) {
+          document.querySelectorAll('#iva-options input[type="checkbox"]').forEach(other => {
+            if (other !== this) other.checked = false;
+          });
+        }
+      });
+    });
+
+    document.getElementById('calc-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const valorBase = parseFloat(valorInput.value);
+    const tarifaIVASeleccionada = document.querySelector('#iva-options input[type="checkbox"]:checked');
+    const tarifaIVA = tarifaIVASeleccionada ? parseFloat(tarifaIVASeleccionada.value) : 0;
+    const valorIVA = valorBase * tarifaIVA;
+    const valorTotalConIVA = valorBase + valorIVA;
+
+    const esBogota = esBogotaInput.checked;
+    const tarifaICASeleccionada = parseFloat(tarifaICASelect.value);
+    const responsabilidadesSeleccionadas = Array.from(responsabilidadesSelect.selectedOptions).map(opt => opt.value);
+    const quienVende = quienVendeSelect.value;
+    const razonSocial = razonSocialInput.value.trim();
+    const esNoDeclarante = document.getElementById('esNoDeclarante')?.checked || false;
+
+    if (responsabilidadesSeleccionadas.length === 0) {
+      alert('Debe seleccionar al menos una responsabilidad fiscal.');
+      return;
+    }
+
+    let reteIVA = 0;
+    if (tarifaIVA > 0 && responsabilidadesSeleccionadas.includes('O-23')) {
+      reteIVA = valorIVA * 0.15;
+    }
+
+    let retefuente = 0;
+    let retefuenteLabel = '';
+    let retefuenteTarifa = 0;
+
+    if (!responsabilidadesSeleccionadas.includes('O-15')) {
+      let tarifa = 0;
+      let umbral = 0;
+
+      if (quienVende === 'persona_natural') {
+        umbral = 100000;
+        if (esNoDeclarante) {
+          tarifa = 0.06;
+          retefuenteLabel = 'Servicios PN - No declarante';
+        } else {
+          tarifa = 0.04;
+          retefuenteLabel = 'Servicios PN - Declarante';
+        }
+      } else {
+        tarifa = 0.025;
+        umbral = 498000;
+        retefuenteLabel = 'Persona Jurídica';
+      }
+
+      if (valorBase >= umbral) {
+        retefuente = valorBase * tarifa;
+        retefuenteTarifa = tarifa;
+      }
+    }
+
+    let ica = 0;
+    let tarifaICA = 0;
+    if (esBogota && !isNaN(tarifaICASeleccionada)) {
+      tarifaICA = tarifaICASeleccionada;
+      ica = valorBase * (tarifaICA / 1000);
+    }
+
+    const totalRetenciones = retefuente + reteIVA + ica;
+    const valorNeto = valorTotalConIVA - totalRetenciones;
+
+    resultadoDiv.innerHTML = `
+      ${razonSocial ? `<p><strong>Razón Social:</strong> ${razonSocial}</p>` : ''}
+      <p class="valor-suave"><strong>Valor base:</strong> $${reformat(valorBase)}</p>
+      <p class="valor-suave"><strong>IVA (${(tarifaIVA * 100).toFixed(0)}%):</strong> $${reformat(valorIVA)}</p>
+      <p class="valor-suave"><strong>Retefuente (${(retefuenteTarifa * 100).toFixed(1)}%):</strong> $${reformat(retefuente)}</p>
+      <p class="valor-suave"><strong>ReteIVA (15% sobre IVA):</strong> $${reformat(reteIVA)}</p>
+      <p class="valor-suave"><strong>ICA Bogotá (${tarifaICA.toFixed(2)}‰):</strong> $${reformat(ica)}</p>
+      <p class="valor-grande">Total Retenciones: $${Math.round(totalRetenciones).toLocaleString('es-CO')}</p>
+      <p class="valor-grande">Valor neto a pagar: $${Math.round(valorNeto).toLocaleString('es-CO')}</p>
+    `;
+    resultadoDiv.style.display = 'block';
+  });
+
+    function reformat(valor) {
+      return valor.toLocaleString('es-CO', {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+
+    document.getElementById('btn-limpiar').addEventListener('click', () => {
+      document.getElementById('calc-form').reset();
+      resultadoDiv.style.display = 'none';
+      cargarResponsabilidades(quienVendeSelect.value);
+      icaContainer.style.display = esBogotaInput.checked ? 'block' : 'none';
+      localStorage.clear();
+    });
+
+    ['quienCompra', 'quienVende', 'valor', 'razonSocial', 'esBogota', 'tarifaICA'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('change', () => {
+          const value = el.type === 'checkbox' ? el.checked : el.value;
+          localStorage.setItem(`form-${id}`, value);
+        });
+      }
+    });
+
+    responsabilidadesSelect.addEventListener('change', () => {
+      const selected = Array.from(responsabilidadesSelect.selectedOptions).map(opt => opt.value);
+      localStorage.setItem('form-responsabilidades', JSON.stringify(selected));
     });
   </script>
 </body>
