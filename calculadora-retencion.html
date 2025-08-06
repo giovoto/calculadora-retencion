@@ -206,12 +206,15 @@
         <div id="ica-container">
           <label for="tarifaICA">Tarifa ICA Bogotá (‰):</label>
           <select id="tarifaICA">
-            <option value="">Seleccione una tarifa</option>
-            <option value="4.14">4.14 ‰</option>
-            <option value="6.9">6.9 ‰</option>
-            <option value="8">8.0 ‰</option>
-            <option value="11.04">11.04 ‰</option>
-          </select>
+  <option value="">Seleccione una tarifa</option>
+  <option value="4.14">4.14 ‰</option>
+  <option value="6.9">6.9 ‰</option>
+  <option value="7">7.0 ‰</option>
+  <option value="9.66">9.66 ‰</option>
+  <option value="11.04">11.04 ‰</option>
+  <option value="13.8">13.8 ‰</option>
+</select>
+
         </div>
 
         <button type="submit">Calcular</button>
@@ -373,6 +376,17 @@
     document.addEventListener('DOMContentLoaded', () => {
       cargarResponsabilidades(quienVendeSelect.value);
     });
+      const esBogotaInput = document.getElementById('esBogota');
+  const icaContainer = document.getElementById('ica-container');
+
+  // Mostrar/ocultar al cargar la página
+  icaContainer.style.display = esBogotaInput.checked ? 'block' : 'none';
+
+  // Evento para mostrar/ocultar dinámicamente
+  esBogotaInput.addEventListener('change', () => {
+    icaContainer.style.display = esBogotaInput.checked ? 'block' : 'none';
+  });
+
   </script>
 </body>
 </html>
