@@ -327,7 +327,7 @@
         <p class="valor-suave"><strong>IVA (${(tarifaIVA * 100).toFixed(0)}%):</strong> $${valorIVA.toLocaleString('es-CO', {minimumFractionDigits: 2})}</p>
         <p class="valor-suave"><strong>Retefuente (${(tarifaAplicada * 100).toFixed(1)}%):</strong> $${retefuente.toLocaleString('es-CO', {minimumFractionDigits: 2})}</p>
         <p class="valor-suave"><strong>ReteIVA (15% sobre IVA):</strong> $${reteIVA.toLocaleString('es-CO', {minimumFractionDigits: 2})}</p>
-        <p class="valor-suave"><strong>ICA Bogotá (${tarifaICA.toFixed(2)}‰):</strong> $${ica.toLocaleString('es-CO', {minimumFractionDigits: 2})}</p>
+        <p class="valor-suave"><strong>ICA Bogotá (${tarifaICA.toFixed(2)}‰):</strong> $${Number(ica.toFixed(2)).toLocaleString('es-CO', {minimumFractionDigits: 2})}</p>
         ${notaRegimenSimple}
         <p class="valor-grande">Total Retenciones: $${Math.round(totalRetenciones).toLocaleString('es-CO')}</p>
         <p class="valor-grande">Valor neto a pagar: $${Math.round(valorNeto).toLocaleString('es-CO')}</p>
